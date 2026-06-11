@@ -1,0 +1,8 @@
+# OS
+.DS_Store
+
+# Editor / local
+*.log
+
+# Vercel
+.vercel
