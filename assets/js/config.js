@@ -16,7 +16,7 @@ window.IOCPR = {
       facebook: "https://facebook.com/",
       instagram: "https://instagram.com/",
       linkedin: "https://linkedin.com/",
-      youtube: "https://youtube.com/",
+      youtube: "https://www.youtube.com/@iocprofficial",
     },
   },
 };

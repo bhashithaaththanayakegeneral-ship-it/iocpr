@@ -3,6 +3,7 @@
    Each page sets <body data-page="about"> to mark its active nav link. */
 (function () {
   const ORG = window.IOCPR.ORG;
+  const I18N = window.IOCPR_I18N;
   const I = (paths) =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 
@@ -20,20 +21,26 @@
   };
 
   const NAV = [
-    ["index.html", "Home", "home"],
-    ["about.html", "About", "about"],
-    ["programs.html", "Programs", "programs"],
-    ["projects.html", "Projects", "projects"],
-    ["impact.html", "Impact", "impact"],
-    ["gallery.html", "Gallery", "gallery"],
-    ["news.html", "News", "news"],
-    ["get-involved.html", "Join Us", "get-involved"],
-    ["contact.html", "Contact", "contact"],
+    ["index.html", "Home", "home", "nav.home"],
+    ["about.html", "About", "about", "nav.about"],
+    ["programs.html", "Programs", "programs", "nav.programs"],
+    ["projects.html", "Projects", "projects", "nav.projects"],
+    ["gallery.html", "Gallery", "gallery", "nav.gallery"],
   ];
 
   const active = document.body.dataset.page || "home";
-  const link = (href, label, key) =>
-    `<a href="${href}" class="${key === active ? "active" : ""}">${label}</a>`;
+  const link = (href, label, key, i18nKey) =>
+    `<a href="${href}" class="${key === active ? "active" : ""}"${i18nKey ? ` data-i18n="${i18nKey}"` : ""}>${label}</a>`;
+
+  const lang = I18N?.getLang ? I18N.getLang() : "en";
+  const langSwitch = `
+    <div class="lang-switch" role="group" aria-label="${I18N?.t ? I18N.t("common.language") : "Language"}">
+      <button type="button" class="lang-btn" data-lang-toggle="en" aria-pressed="${lang === "en"}">EN</button>
+      <button type="button" class="lang-btn" data-lang-toggle="si" aria-pressed="${lang === "si"}">සි</button>
+    </div>`;
+
+  const ctaButtons = `
+    <a href="contact.html" class="btn btn--accent" data-i18n="common.contactUs">Contact Us</a>`;
 
   /* ---------- Header ---------- */
   const headerHTML = `
@@ -45,7 +52,8 @@
         </a>
         <nav class="nav-links" aria-label="Primary">${NAV.map((n) => link(...n)).join("")}</nav>
         <div class="nav-cta">
-          <a href="donate.html" class="btn btn--accent">Donate</a>
+          ${langSwitch}
+          ${ctaButtons}
           <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">${ICONS.menu}</button>
         </div>
       </div>
@@ -57,7 +65,8 @@
         <button class="nav-toggle" id="navClose" aria-label="Close menu">${ICONS.close}</button>
       </div>
       ${NAV.map((n) => link(...n)).join("")}
-      <a href="donate.html" class="btn btn--accent">Donate Now</a>
+      <div style="margin: 10px 0 8px;">${langSwitch}</div>
+      ${ctaButtons}
     </aside>`;
 
   /* ---------- Footer ---------- */
@@ -71,41 +80,40 @@
       <div class="container footer-grid">
         <div class="footer-brand">
           <img src="${ORG.logo}" alt="${ORG.name}" />
-          <p>${ORG.full}. Working to prevent crime, rehabilitate offenders and build safer, more just communities.</p>
+          <p data-i18n="footer.blurb">${ORG.full}. Working to prevent crime, rehabilitate offenders and build safer, more just communities.</p>
           <div class="social">${social}</div>
         </div>
         <div>
-          <h4>Explore</h4>
+          <h4 data-i18n="footer.explore">Explore</h4>
           <ul class="foot-links">
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="programs.html">Our Programs</a></li>
+            <li><a href="about.html" data-i18n="footer.aboutUs">About Us</a></li>
+            <li><a href="programs.html" data-i18n="footer.ourPrograms">Our Programs</a></li>
             <li><a href="projects.html">Projects</a></li>
-            <li><a href="impact.html">Our Impact</a></li>
-            <li><a href="news.html">News &amp; Highlights</a></li>
+            <li><a href="impact.html" data-i18n="footer.ourImpact">Our Impact</a></li>
+            <li><a href="news.html" data-i18n="footer.newsHighlights">News &amp; Highlights</a></li>
           </ul>
         </div>
         <div>
-          <h4>Get Involved</h4>
+          <h4 data-i18n="footer.getInvolved">Get Involved</h4>
           <ul class="foot-links">
-            <li><a href="get-involved.html">Volunteer</a></li>
-            <li><a href="donate.html">Donate</a></li>
-            <li><a href="get-involved.html">Partner With Us</a></li>
+            <li><a href="get-involved.html" data-i18n="footer.volunteer">Volunteer</a></li>
+            <li><a href="get-involved.html" data-i18n="footer.partner">Partner With Us</a></li>
             <li><a href="gallery.html">Gallery</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
         <div class="foot-news">
-          <h4>Stay Connected</h4>
-          <p style="color:#9bb6b0;font-size:.9rem;margin-bottom:14px;">Get updates on our programs and impact.</p>
-          <form onsubmit="event.preventDefault(); this.reset(); alert('Thank you for subscribing!');">
-            <input type="email" placeholder="Your email address" required aria-label="Email" />
-            <button class="btn btn--accent" style="width:100%">Subscribe</button>
+          <h4 data-i18n="footer.stayConnected">Stay Connected</h4>
+          <p style="color:#9bb6b0;font-size:.9rem;margin-bottom:14px;" data-i18n="footer.stayConnectedBlurb">Get updates on our programs and impact.</p>
+          <form onsubmit="event.preventDefault(); this.reset(); alert(window.IOCPR_I18N?.t?.('footer.subscribeThanks') || 'Thank you for subscribing!');">
+            <input type="email" placeholder="Your email address" required aria-label="Email" data-i18n="footer.emailPlaceholder" data-i18n-attr="placeholder" />
+            <button class="btn btn--accent" style="width:100%" data-i18n="footer.subscribe">Subscribe</button>
           </form>
           <p style="margin-top:16px;color:#9bb6b0;font-size:.88rem;">${ICONS.pin}${ORG.address}</p>
         </div>
       </div>
       <div class="container foot-bottom">
-        <span>© ${year} ${ORG.name}. All rights reserved.</span>
+        <span>© ${year} ${ORG.name}. <span data-i18n="footer.rights">All rights reserved.</span></span>
         <span>${ORG.full}</span>
       </div>
     </footer>`;
@@ -118,6 +126,7 @@
 
   /* expose icons for page scripts */
   window.ICONS = ICONS;
+  I18N?.applyI18n?.();
 
   /* ---------- Behaviours ---------- */
   document.addEventListener("DOMContentLoaded", initBehaviours);
@@ -146,6 +155,14 @@
     document.getElementById("navClose")?.addEventListener("click", () => open(false));
     backdrop?.addEventListener("click", () => open(false));
     drawer?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => open(false)));
+
+    // language toggle
+    document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const next = btn.getAttribute("data-lang-toggle");
+        if (next) I18N?.setLang?.(next);
+      });
+    });
 
     // scroll reveal
     const io = new IntersectionObserver(
