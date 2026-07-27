@@ -104,12 +104,12 @@
         </div>
         <div class="foot-news">
           <h4 data-i18n="footer.stayConnected">Stay Connected</h4>
-          <p style="color:#9bb6b0;font-size:.9rem;margin-bottom:14px;" data-i18n="footer.stayConnectedBlurb">Get updates on our programs and impact.</p>
+          <p style="color:#8AB5D8;font-size:.9rem;margin-bottom:14px;" data-i18n="footer.stayConnectedBlurb">Get updates on our programs and impact.</p>
           <form onsubmit="event.preventDefault(); this.reset(); alert(window.IOCPR_I18N?.t?.('footer.subscribeThanks') || 'Thank you for subscribing!');">
             <input type="email" placeholder="Your email address" required aria-label="Email" data-i18n="footer.emailPlaceholder" data-i18n-attr="placeholder" />
             <button class="btn btn--accent" style="width:100%" data-i18n="footer.subscribe">Subscribe</button>
           </form>
-          <p style="margin-top:16px;color:#9bb6b0;font-size:.88rem;">${ICONS.pin}${ORG.address}</p>
+          <p style="margin-top:16px;color:#8AB5D8;font-size:.88rem;">${ICONS.pin}${ORG.address}</p>
         </div>
       </div>
       <div class="container foot-bottom">
