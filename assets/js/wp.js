@@ -47,7 +47,7 @@
     return cleaned;
   };
 
-  /* Alt format: "Project Name | home | hero"
+  /* Alt format: "Project Name | home | hero" or "hero-1" (loads first in hero)
      First non-flag segment = project name; flags control page placement. */
   const parseAltMeta = (altText) => {
     const parts = strip(altText || "")
@@ -56,10 +56,22 @@
       .filter(Boolean);
     const flags = [];
     const nameParts = [];
+    let heroRank = 0;
     parts.forEach((p) => {
       const lower = p.toLowerCase();
-      if (lower === "home" || lower === "hero" || lower === "gallery") flags.push(lower);
-      else nameParts.push(p);
+      if (lower === "home" || lower === "gallery") {
+        flags.push(lower);
+        return;
+      }
+      const heroMatch = /^hero(?:-(\d+))?$/i.exec(lower);
+      if (heroMatch) {
+        flags.push("hero");
+        const n = heroMatch[1] ? parseInt(heroMatch[1], 10) : 0;
+        if (n > 0 && (!heroRank || n < heroRank)) heroRank = n;
+        if (n === 1) flags.push("hero-1");
+        return;
+      }
+      nameParts.push(p);
     });
     const project = normalizeProject(nameParts.join(" "));
     return {
@@ -67,6 +79,8 @@
       flags,
       home: flags.includes("home") || flags.includes("hero"),
       hero: flags.includes("hero"),
+      heroFirst: flags.includes("hero-1") || heroRank === 1,
+      heroRank,
     };
   };
 
@@ -83,6 +97,8 @@
       flags: meta.flags,
       home: meta.home,
       hero: meta.hero,
+      heroFirst: meta.heroFirst,
+      heroRank: meta.heroRank || 0,
       alt: meta.project || strip(m.title?.rendered) || "IOCPR gallery image",
       title: strip(m.title?.rendered) || "",
       date: m.date || "",
@@ -161,6 +177,11 @@
       imgs.forEach((img) => {
         const name = img.project || normalizeProject(img.alt);
         if (!name) return;
+        /* Role portraits are not projects */
+        if (/^secretary\s+general$/i.test(name)) return;
+        if (/^nilantha$/i.test(name)) return;
+        if (/^anusha\s+edirisnghe$/i.test(name)) return;
+        if (/^udayakumara$/i.test(name)) return;
         const key = name.toLowerCase();
         if (!map.has(key)) {
           map.set(key, { name, slug: key.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), images: [] });
@@ -170,7 +191,7 @@
       return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
     },
 
-    /* Images for the homepage: prefer | home / | hero tags; else fall back to gallery set. */
+    /* Images for homepage supporting sections: | home (and | hero). Falls back to gallery. */
     async mediaForHome(limit = 24) {
       const imgs = await this.mediaAll();
       const tagged = imgs.filter((m) => m.home || m.hero);
@@ -178,6 +199,21 @@
       const heroes = pool.filter((m) => m.hero);
       const rest = pool.filter((m) => !m.hero);
       return [...heroes, ...rest].slice(0, limit);
+    },
+
+    /* Home / About hero slider — all "| hero" / "hero-1" images.
+       hero-1 (or | hero-1) always loads first. */
+    async mediaForHero(limit = 0) {
+      const imgs = await this.mediaAll();
+      const heroes = imgs
+        .filter((m) => m.hero)
+        .sort((a, b) => {
+          const ra = a.heroFirst ? 0 : a.heroRank > 0 ? a.heroRank : 999;
+          const rb = b.heroFirst ? 0 : b.heroRank > 0 ? b.heroRank : 999;
+          if (ra !== rb) return ra - rb;
+          return 0;
+        });
+      return limit > 0 ? heroes.slice(0, limit) : heroes;
     },
 
     /* A single page's rendered content by slug (optional, for prose pages) */

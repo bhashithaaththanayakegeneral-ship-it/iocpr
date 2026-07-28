@@ -33,29 +33,29 @@ Project Name | where
 You can combine flags:
 
 ```text
-Youth Shield | home | hero
+BMICH 27 July | home | hero
 ```
 
 ---
 
 ## 2. Examples
 
-| Alternative Text | Gallery | Projects | Home |
-|------------------|---------|----------|------|
-| `Youth Shield` | Yes | Youth Shield carousel | No |
-| `Youth Shield \| home` | Yes | Youth Shield carousel | Yes |
-| `Youth Shield \| home \| hero` | Yes | Youth Shield carousel | Yes (preferred hero) |
-| `Safe Communities Initiative \| home` | Yes | That project | Yes |
-| *(empty)* | Yes | No | No |
+| Alternative Text | Gallery | Projects | Home | Hero slider |
+|------------------|---------|----------|------|-------------|
+| `Kolonna` | Yes | Community Policing Workshop | No | No |
+| `Negombo \| home` | Yes | Crime Prevention Awareness Workshop | Yes | No |
+| `BMICH 27 July \| home \| hero` | Yes | Membership Workshop | Yes | Yes |
+| *(empty)* | Yes | No | No | No |
 
 ### Good project names (keep spelling consistent)
 
-- `Safe Communities Initiative`
-- `Second Chance Skills`
-- `Youth Shield`
-- `Justice Access Clinics`
-- `Community Leaders Academy`
-- `Policy & Insight Lab`
+- `BMICH 27 July` *(Special Membership Development Workshop)*
+- `Kolonna` *(Community Policing Workshop)*
+- `Negombo` *(Crime Prevention Awareness Workshop)*
+- `Sambuddha Jayanthi` *(Crime Prevention and Rehabilitation Training Workshop)*
+- `BMICH Recognition` *(Grand Recognition Ceremony)*
+- `Dehiovita` *(Domestic Violence Prevention Awareness Workshop)*
+- `Lakma Medura` *(Crime Prevention Training Workshop)*
 
 Use the **exact same** name for every photo in that project.
 
@@ -94,9 +94,9 @@ Use the **exact same** name for every photo in that project.
 - Images with empty or generic alt are **not** listed as a project
 
 ### Home page (`/`)
-- Uses photos tagged with `home`
-- Prefers photos tagged `hero` for the main featured image
-- Other `home` photos can fill supporting sections
+- Uses photos tagged with `home` for supporting sections
+- **Hero slider shows only photos tagged `hero`** (e.g. `Project Name | home | hero`)
+- Photos with only `| home` do **not** appear in the hero
 
 ---
 
@@ -124,21 +124,87 @@ For a new project photo:
 
 ---
 
-## 7. Quick copy-paste templates
+## 7. Alt text variations (copy-paste)
+
+Use **exactly** one of these in WordPress **Alternative Text**.
+
+### Format
+```text
+Project Name
+Project Name | home
+Project Name | home | hero
+```
+
+| Alt text | Gallery | Projects | Home | Hero slider |
+|----------|---------|----------|------|-------------|
+| `Project Name` | Yes | Yes | No | No |
+| `Project Name \| home` | Yes | Yes | Yes | Possible |
+| `Project Name \| home \| hero` | Yes | Yes | Yes | Preferred |
+
+---
+
+### Special Membership Development Workshop
+Card title on the site. For photos, use the short Alt:
 
 ```text
-Youth Shield
-Youth Shield | home
-Youth Shield | home | hero
-
-Safe Communities Initiative
-Safe Communities Initiative | home
-
-Second Chance Skills | home
-Justice Access Clinics | home
-Community Leaders Academy | home
-Policy & Insight Lab | home
+BMICH 27 July
+BMICH 27 July | home
+BMICH 27 July | home | hero
 ```
+
+### Community Policing Workshop
+```text
+Kolonna
+Kolonna | home
+Kolonna | home | hero
+```
+
+### Crime Prevention Awareness Workshop
+```text
+Negombo
+Negombo | home
+Negombo | home | hero
+```
+
+### Crime Prevention and Rehabilitation Training Workshop
+```text
+Sambuddha Jayanthi
+Sambuddha Jayanthi | home
+Sambuddha Jayanthi | home | hero
+```
+
+### Grand Recognition Ceremony
+```text
+BMICH Recognition
+BMICH Recognition | home
+BMICH Recognition | home | hero
+```
+
+### Domestic Violence Prevention Awareness Workshop
+```text
+Dehiovita
+Dehiovita | home
+Dehiovita | home | hero
+```
+
+### Crime Prevention Training Workshop
+```text
+Lakma Medura
+Lakma Medura | home
+Lakma Medura | home | hero
+```
+
+---
+
+### Which one to use?
+
+| Goal | Use this |
+|------|----------|
+| Project carousel only (+ Gallery) | `Project Name` |
+| Also show on Home | `Project Name \| home` |
+| Best photo for Home hero slider | `Project Name \| home \| hero` |
+
+Use `| home | hero` on only **1–2** strongest photos.
 
 ---
 

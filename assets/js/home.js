@@ -1,5 +1,5 @@
-/* Home page — rectangular hero photo frame with swipe / prev-next.
-   Prefers images tagged "| home" / "| hero"; falls back to gallery. */
+/* Hero photo frame — used on Home and About (story).
+   Only images tagged "| hero" appear in the slider. */
 (function () {
   const esc = (s) =>
     String(s || "")
@@ -13,7 +13,7 @@
     const dotsWrap = root.querySelector("[data-hero-dots]");
     if (!track) return;
 
-    const slides = imgs.slice(0, 10);
+    const slides = imgs;
     track.innerHTML = slides
       .map(
         (img, i) =>
@@ -133,11 +133,10 @@
 
   async function boot() {
     const frame = document.querySelector("[data-hero-frame]");
-    if (!frame || !window.WP?.mediaForHome) return;
-    const imgs = await window.WP.mediaForHome(12);
-    if (!imgs.length) return;
-    const heroes = imgs.filter((m) => m.hero);
-    initFrame(frame, heroes.length ? heroes : imgs);
+    if (!frame || !window.WP?.mediaForHero) return;
+    const heroes = await window.WP.mediaForHero();
+    if (!heroes.length) return;
+    initFrame(frame, heroes);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

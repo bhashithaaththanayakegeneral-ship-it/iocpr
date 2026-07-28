@@ -171,6 +171,19 @@
       });
     });
 
+    // See more / See less for collapsed message bodies
+    document.querySelectorAll("[data-see-more]").forEach((btn) => {
+      const body =
+        document.getElementById(btn.getAttribute("aria-controls") || "") ||
+        btn.previousElementSibling;
+      if (!body) return;
+      btn.addEventListener("click", () => {
+        const open = body.classList.toggle("is-collapsed") === false;
+        btn.setAttribute("aria-expanded", String(open));
+        btn.textContent = open ? "See less" : "See more";
+      });
+    });
+
     // scroll reveal
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }),

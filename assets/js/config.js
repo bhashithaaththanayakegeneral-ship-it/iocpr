@@ -3,12 +3,16 @@
    public REST API. Change WP_BASE to point at a different WordPress install. */
 window.IOCPR = {
   WP_BASE: "https://iocpr.com/wp-json",
+  /* Contact Form 7 — shortcode hash 8c4c6a1; REST API needs numeric post ID */
+  CF7: {
+    formId: "3626",
+  },
   ORG: {
     name: "IOCPR",
     full: "International Organization for Crime Prevention and Rehabilitation",
     tagline: "A Hand to Reform, A World Without Crime.",
-    email: "info@iocpr.com",
-    phone: "+94 11 000 0000",
+    email: "iocproffice@gmail.com",
+    phone: "0770023624 / 0770023654",
     address: "Himbutana, Battaramulla, Sri Lanka",
     logo: "https://iocpr.com/wp-content/uploads/2026/03/IOCRP-scaled.png",
     founded: "2025",

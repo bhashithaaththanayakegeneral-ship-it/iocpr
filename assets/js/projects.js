@@ -1,7 +1,6 @@
-/* Projects page — groups WP media by Alt Text (project name) and
-   renders each project with a swipeable image carousel.
-   Convention: in WordPress Media, set Alternative Text = project name
-   (e.g. "Safe Communities Initiative"). Same alt = same project. */
+/* Projects page — fixed project cards (title + description)
+   with a swipeable image carousel. WP Alt Text / altKey fills each
+   carousel (e.g. "Kolonna" or "BMICH 27 July | home | hero"). */
 (function () {
   const mount = document.querySelector("[data-projects]");
   if (!mount) return;
@@ -12,44 +11,70 @@
       .replace(/</g, "&lt;")
       .replace(/"/g, "&quot;");
 
-  const FALLBACK_META = [
+  const PROJECTS = [
     {
-      name: "Safe Communities Initiative",
+      name: "Special Membership Development Workshop",
+      altKey: "BMICH 27 July",
+      tag: "Membership",
+      blurb:
+        "A special membership development workshop at the Bandaranaike Memorial International Conference Hall (BMICH), Colombo — strengthening IOCPR’s shared mission of crime prevention and rehabilitation.",
+      meta: "27 July 2026 · BMICH, Colombo, Sri Lanka",
+    },
+    {
+      name: "Community Policing Workshop",
+      altKey: "Kolonna",
       tag: "Prevention",
-      blurb: "Neighbourhood awareness drives that bring residents, schools and local authorities together to reduce crime at its source.",
-      meta: "Ongoing · Battaramulla & surrounds",
+      blurb:
+        "Workshop conducted with a focus on community policing in the Kolonna Police Division, Ratnapura District.",
+      meta: "Kolonna Police Division · Ratnapura District",
     },
     {
-      name: "Second Chance Skills",
-      tag: "Rehabilitation",
-      blurb: "Vocational training and mentorship that prepare reformed individuals for employment and independent living.",
-      meta: "Ongoing · National",
+      name: "Crime Prevention Awareness Workshop",
+      altKey: "Negombo",
+      tag: "Prevention",
+      blurb:
+        "Crime prevention awareness workshop conducted in the Negombo Police Division, Sri Lanka.",
+      meta: "Negombo Police Division · Sri Lanka",
     },
     {
-      name: "Youth Shield",
-      tag: "Youth",
-      blurb: "Mentoring and safe spaces that protect at-risk young people and open doors to education and opportunity.",
-      meta: "Launching 2026",
+      name: "Crime Prevention and Rehabilitation Training Workshop",
+      altKey: "Sambuddha Jayanthi",
+      tag: "Training",
+      blurb:
+        "Crime prevention and rehabilitation training workshop held at the Sambuddha Jayanthi Mandiraya, Colombo, Sri Lanka.",
+      meta: "Sambuddha Jayanthi Mandiraya · Colombo, Sri Lanka",
     },
     {
-      name: "Justice Access Clinics",
-      tag: "Legal Aid",
-      blurb: "Free legal guidance and human-rights support for those who cannot otherwise afford representation.",
-      meta: "Pilot phase",
+      name: "Grand Recognition Ceremony",
+      altKey: "BMICH Recognition",
+      tag: "Recognition",
+      blurb:
+        "Grand Recognition Ceremony honouring distinguished professionals in the fields of criminology and law, held at the Bandaranaike Memorial International Conference Hall (BMICH), Colombo, Sri Lanka.",
+      meta: "BMICH · Colombo, Sri Lanka",
     },
     {
-      name: "Community Leaders Academy",
-      tag: "Leadership",
-      blurb: "Training local champions to sustain prevention and reform work within their own communities.",
-      meta: "Ongoing",
+      name: "Domestic Violence Prevention Awareness Workshop",
+      altKey: "Dehiovita",
+      tag: "Prevention",
+      blurb:
+        "Domestic violence prevention awareness workshop conducted to raise awareness among the plantation community in Dehiovita, Kegalle District, Sri Lanka.",
+      meta: "Dehiovita · Kegalle District, Sri Lanka",
     },
     {
-      name: "Policy & Insight Lab",
-      tag: "Research",
-      blurb: "Research partnerships that turn community evidence into fairer, more effective crime policy.",
-      meta: "Ongoing",
+      name: "Crime Prevention Training Workshop",
+      altKey: "Lakma Medura",
+      tag: "Training",
+      blurb:
+        "Crime prevention training workshop held at the Mihiaka Medura Hall, Bandaranaike Memorial International Conference Hall (BMICH), Colombo, Sri Lanka.",
+      meta: "Mihiaka Medura Hall, BMICH · Colombo, Sri Lanka",
     },
   ];
+
+  const PLACEHOLDER = {
+    thumb: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
+    src: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
+    alt: "IOCPR",
+  };
 
   function carouselHTML(project) {
     const imgs = project.images || [];
@@ -88,25 +113,14 @@
   }
 
   function cardHTML(project, i) {
-    const count = project.images?.length || 0;
-    const tag = project.tag
-      ? `<span class="tag">${esc(project.tag)}</span>`
-      : `<span class="tag">${count} photo${count === 1 ? "" : "s"}</span>`;
-    const blurb = project.blurb
-      ? `<p>${esc(project.blurb)}</p>`
-      : `<p>Photos from the <strong>${esc(project.name)}</strong> project.</p>`;
-    const meta = project.meta
-      ? `<div class="meta">${esc(project.meta)}</div>`
-      : `<div class="meta">${count} image${count === 1 ? "" : "s"} from the field</div>`;
-
     return `
       <article class="project-card reveal" data-d="${(i % 3) + 1}">
         ${carouselHTML(project)}
         <div class="body">
-          ${tag}
+          <span class="tag">${esc(project.tag)}</span>
           <h3>${esc(project.name)}</h3>
-          ${blurb}
-          ${meta}
+          <p>${esc(project.blurb)}</p>
+          <div class="meta">${esc(project.meta)}</div>
         </div>
       </article>`;
   }
@@ -125,11 +139,6 @@
     let deltaX = 0;
     let width = root.clientWidth || 1;
 
-    const measure = () => {
-      width = root.clientWidth || 1;
-      go(index, false);
-    };
-
     const go = (next, animate = true) => {
       index = ((next % slides.length) + slides.length) % slides.length;
       track.style.transition = animate ? "transform .4s cubic-bezier(.22, 1, .36, 1)" : "none";
@@ -140,7 +149,6 @@
 
     const next = () => go(index + 1);
     const prev = () => go(index - 1);
-
     const restart = () => {
       clearInterval(timer);
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -176,14 +184,11 @@
       track.style.transition = "none";
       clearInterval(timer);
     };
-
     const onMove = (clientX) => {
       if (!dragging) return;
       deltaX = clientX - startX;
-      const pct = (deltaX / width) * 100;
-      track.style.transform = `translate3d(${-index * 100 + pct}%, 0, 0)`;
+      track.style.transform = `translate3d(${-index * 100 + (deltaX / width) * 100}%, 0, 0)`;
     };
-
     const onEnd = () => {
       if (!dragging) return;
       dragging = false;
@@ -195,24 +200,13 @@
       restart();
     };
 
-    /* Touch swipe */
-    root.addEventListener(
-      "touchstart",
-      (e) => onStart(e.touches[0].clientX),
-      { passive: true }
-    );
-    root.addEventListener(
-      "touchmove",
-      (e) => onMove(e.touches[0].clientX),
-      { passive: true }
-    );
+    root.addEventListener("touchstart", (e) => onStart(e.touches[0].clientX), { passive: true });
+    root.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
     root.addEventListener("touchend", onEnd, { passive: true });
     root.addEventListener("touchcancel", onEnd, { passive: true });
 
-    /* Mouse / trackpad drag */
     root.addEventListener("pointerdown", (e) => {
-      if (e.pointerType === "touch") return;
-      if (e.button !== 0) return;
+      if (e.pointerType === "touch" || e.button !== 0) return;
       if (e.target.closest(".carousel__btn, .carousel__dot")) return;
       root.setPointerCapture(e.pointerId);
       onStart(e.clientX);
@@ -226,50 +220,71 @@
       onEnd();
     });
     root.addEventListener("pointercancel", onEnd);
+    window.addEventListener("resize", () => go(index, false));
 
-    window.addEventListener("resize", measure);
     go(0, false);
     restart();
   }
 
-  /* Spread gallery images across fallback projects so each has a swipeable set. */
-  function buildFallbackProjects(allImages) {
-    const imgs = allImages.length
-      ? allImages
-      : [
-          {
-            thumb: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
-            src: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
-            alt: "IOCPR",
-          },
-        ];
-
-    return FALLBACK_META.map((meta, i) => {
-      const chunk = [];
-      for (let n = i; n < imgs.length; n += FALLBACK_META.length) chunk.push(imgs[n]);
-      if (!chunk.length) chunk.push(imgs[i % imgs.length]);
-      return { ...meta, images: chunk };
-    });
+  function matchKey(name) {
+    return String(name || "")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   }
 
-  mount.innerHTML = Array.from({ length: 6 })
-    .map(() => `<div class="skeleton" style="aspect-ratio:4/5;border-radius:var(--radius)"></div>`)
-    .join("");
+  /* Fixed cards: titles/descriptions + WP images matched by project name.
+     Untagged gallery photos are spread across cards so swipe still works. */
+  function buildProjects(groups, allImages) {
+    const byName = new Map();
+    (groups || []).forEach((g) => {
+      const key = matchKey(g.name);
+      if (key) byName.set(key, g.images || []);
+    });
+
+    const used = new Set();
+    const assigned = PROJECTS.map((meta) => {
+      const keys = [meta.altKey, meta.name].filter(Boolean).map(matchKey);
+      const imgs =
+        keys.map((k) => byName.get(k)).find((list) => list && list.length) || [];
+      imgs.forEach((img) => {
+        if (img.id != null) used.add(img.id);
+        else if (img.src) used.add(img.src);
+      });
+      return { ...meta, images: [...imgs] };
+    });
+
+    const leftovers = (allImages || []).filter((img) => {
+      if (img.id != null) return !used.has(img.id);
+      return img.src && !used.has(img.src);
+    });
+
+    assigned.forEach((project, i) => {
+      if (project.images.length) return;
+      const chunk = [];
+      for (let n = i; n < leftovers.length; n += PROJECTS.length) chunk.push(leftovers[n]);
+      if (!chunk.length && leftovers.length) chunk.push(leftovers[i % leftovers.length]);
+      if (!chunk.length) chunk.push({ ...PLACEHOLDER, alt: project.name });
+      project.images = chunk;
+    });
+
+    return assigned;
+  }
+
+  mount.className = "grid grid-3 projects-grid";
+  mount.innerHTML = PROJECTS.map(
+    () => `<div class="skeleton" style="aspect-ratio:3/4;border-radius:var(--radius)"></div>`
+  ).join("");
 
   (async () => {
-    const groups = await window.WP.mediaByProject();
-    let projects;
+    const [groups, all] = await Promise.all([
+      window.WP.mediaByProject(),
+      window.WP.mediaAll?.() || [],
+    ]);
+    const projects = buildProjects(groups, all);
 
-    if (groups.length) {
-      projects = groups.map((g) => ({ name: g.name, images: g.images }));
-    } else {
-      const all = (await window.WP.mediaAll?.()) || [];
-      projects = buildFallbackProjects(all);
-    }
-
-    mount.className = "grid grid-3";
     mount.innerHTML = projects.map(cardHTML).join("");
-
     mount.querySelectorAll("[data-carousel]").forEach(initCarousel);
     mount.querySelectorAll(".reveal").forEach((el) => {
       requestAnimationFrame(() => el.classList.add("in"));
