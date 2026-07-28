@@ -1,5 +1,5 @@
 /* Hero photo frame — used on Home and About (story).
-   Only images tagged "| hero" appear in the slider. */
+   Home: | hero + hero-f1… (f1 first). About: hero-1 / hero-2 only. */
 (function () {
   const esc = (s) =>
     String(s || "")
@@ -133,9 +133,12 @@
 
   async function boot() {
     const frame = document.querySelector("[data-hero-frame]");
-    if (!frame || !window.WP?.mediaForHero) return;
-    const heroes = await window.WP.mediaForHero();
-    if (!heroes.length) return;
+    if (!frame || !window.WP) return;
+    const aboutOnly = frame.getAttribute("data-hero-scope") === "about";
+    const heroes = aboutOnly
+      ? await window.WP.mediaForAboutHero?.()
+      : await window.WP.mediaForHero?.();
+    if (!heroes?.length) return;
     initFrame(frame, heroes);
   }
 

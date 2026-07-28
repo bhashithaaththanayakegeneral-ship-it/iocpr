@@ -47,8 +47,10 @@
     return cleaned;
   };
 
-  /* Alt format: "Project Name | home | hero" or "hero-1" (loads first in hero)
-     First non-flag segment = project name; flags control page placement. */
+  /* Alt flags:
+     - hero / Project | hero     → Home hero carousel
+     - hero-f1, hero-f2, …       → Home hero, sorted first (f1, f2, …)
+     - hero-1, hero-2            → About story carousel only */
   const parseAltMeta = (altText) => {
     const parts = strip(altText || "")
       .split("|")
@@ -57,30 +59,51 @@
     const flags = [];
     const nameParts = [];
     let heroRank = 0;
+    let homeFeaturedRank = 0;
+    let aboutHero = false;
+
     parts.forEach((p) => {
       const lower = p.toLowerCase();
       if (lower === "home" || lower === "gallery") {
         flags.push(lower);
         return;
       }
-      const heroMatch = /^hero(?:-(\d+))?$/i.exec(lower);
-      if (heroMatch) {
+
+      /* About-only: hero-1 / hero-2 */
+      const aboutMatch = /^hero-([12])$/i.exec(lower);
+      if (aboutMatch) {
         flags.push("hero");
-        const n = heroMatch[1] ? parseInt(heroMatch[1], 10) : 0;
-        if (n > 0 && (!heroRank || n < heroRank)) heroRank = n;
-        if (n === 1) flags.push("hero-1");
+        heroRank = parseInt(aboutMatch[1], 10);
+        aboutHero = true;
         return;
       }
+
+      /* Home featured: hero-f1, hero-f2, … */
+      const featuredMatch = /^hero-f(\d+)$/i.exec(lower);
+      if (featuredMatch) {
+        flags.push("hero");
+        homeFeaturedRank = parseInt(featuredMatch[1], 10) || 1;
+        return;
+      }
+
+      /* Plain hero */
+      if (/^hero$/i.test(lower)) {
+        flags.push("hero");
+        return;
+      }
+
       nameParts.push(p);
     });
+
     const project = normalizeProject(nameParts.join(" "));
     return {
       project,
       flags,
-      home: flags.includes("home") || flags.includes("hero"),
+      home: flags.includes("home") || (flags.includes("hero") && !aboutHero),
       hero: flags.includes("hero"),
-      heroFirst: flags.includes("hero-1") || heroRank === 1,
       heroRank,
+      homeFeaturedRank,
+      aboutHero,
     };
   };
 
@@ -97,8 +120,9 @@
       flags: meta.flags,
       home: meta.home,
       hero: meta.hero,
-      heroFirst: meta.heroFirst,
       heroRank: meta.heroRank || 0,
+      homeFeaturedRank: meta.homeFeaturedRank || 0,
+      aboutHero: !!meta.aboutHero,
       alt: meta.project || strip(m.title?.rendered) || "IOCPR gallery image",
       title: strip(m.title?.rendered) || "",
       date: m.date || "",
@@ -182,6 +206,9 @@
         if (/^nilantha$/i.test(name)) return;
         if (/^anusha\s+edirisnghe$/i.test(name)) return;
         if (/^udayakumara$/i.test(name)) return;
+        if (/^lawlady$/i.test(name)) return;
+        if (/^hero-f\d+$/i.test(name)) return;
+        if (/^hero-[12]$/i.test(name)) return;
         const key = name.toLowerCase();
         if (!map.has(key)) {
           map.set(key, { name, slug: key.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), images: [] });
@@ -201,19 +228,27 @@
       return [...heroes, ...rest].slice(0, limit);
     },
 
-    /* Home / About hero slider — all "| hero" / "hero-1" images.
-       hero-1 (or | hero-1) always loads first. */
+    /* Home hero — "| hero" and "hero-f1"… ; excludes About-only hero-1 / hero-2.
+       Featured ranks (hero-f1, hero-f2, …) sort to the front. */
     async mediaForHero(limit = 0) {
       const imgs = await this.mediaAll();
       const heroes = imgs
-        .filter((m) => m.hero)
+        .filter((m) => m.hero && !m.aboutHero)
         .sort((a, b) => {
-          const ra = a.heroFirst ? 0 : a.heroRank > 0 ? a.heroRank : 999;
-          const rb = b.heroFirst ? 0 : b.heroRank > 0 ? b.heroRank : 999;
-          if (ra !== rb) return ra - rb;
+          const fa = a.homeFeaturedRank > 0 ? a.homeFeaturedRank : 999;
+          const fb = b.homeFeaturedRank > 0 ? b.homeFeaturedRank : 999;
+          if (fa !== fb) return fa - fb;
           return 0;
         });
       return limit > 0 ? heroes.slice(0, limit) : heroes;
+    },
+
+    /* About story carousel — only hero-1 then hero-2. */
+    async mediaForAboutHero() {
+      const imgs = await this.mediaAll();
+      return imgs
+        .filter((m) => m.aboutHero)
+        .sort((a, b) => (a.heroRank || 99) - (b.heroRank || 99));
     },
 
     /* A single page's rendered content by slug (optional, for prose pages) */
