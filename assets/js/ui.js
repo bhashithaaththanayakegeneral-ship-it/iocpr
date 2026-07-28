@@ -35,8 +35,8 @@
   const lang = I18N?.getLang ? I18N.getLang() : "en";
   const langSwitch = `
     <div class="lang-switch" role="group" aria-label="${I18N?.t ? I18N.t("common.language") : "Language"}">
-      <button type="button" class="lang-btn" data-lang-toggle="en" aria-pressed="${lang === "en"}">EN</button>
-      <button type="button" class="lang-btn" data-lang-toggle="si" aria-pressed="${lang === "si"}">සි</button>
+      <button type="button" class="lang-btn${lang === "en" ? " active" : ""}" data-lang-toggle="en" aria-pressed="${lang === "en"}">EN</button>
+      <button type="button" class="lang-btn${lang === "si" ? " active" : ""}" data-lang-toggle="si" aria-pressed="${lang === "si"}">සි</button>
     </div>`;
 
   const ctaButtons = `
@@ -54,19 +54,21 @@
         <div class="nav-cta">
           ${langSwitch}
           ${ctaButtons}
-          <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">${ICONS.menu}</button>
+          <button type="button" class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">${ICONS.menu}</button>
         </div>
       </div>
     </header>
-    <div class="nav-backdrop" id="navBackdrop"></div>
-    <aside class="drawer" id="drawer" aria-label="Mobile menu">
+    <div class="nav-backdrop" id="navBackdrop" hidden></div>
+    <aside class="drawer" id="drawer" aria-label="Mobile menu" aria-hidden="true">
       <div class="drawer__top">
         <b>${ORG.name}</b>
-        <button class="nav-toggle" id="navClose" aria-label="Close menu">${ICONS.close}</button>
+        <button type="button" class="nav-toggle" id="navClose" aria-label="Close menu">${ICONS.close}</button>
       </div>
-      ${NAV.map((n) => link(...n)).join("")}
-      <div style="margin: 10px 0 8px;">${langSwitch}</div>
-      ${ctaButtons}
+      <nav class="drawer-links" aria-label="Mobile primary">${NAV.map((n) => link(...n)).join("")}</nav>
+      <div class="drawer-actions">
+        ${langSwitch}
+        ${ctaButtons}
+      </div>
     </aside>`;
 
   /* ---------- Footer ---------- */
@@ -148,6 +150,8 @@
     const open = (state) => {
       drawer?.classList.toggle("open", state);
       backdrop?.classList.toggle("open", state);
+      if (backdrop) backdrop.hidden = !state;
+      if (drawer) drawer.setAttribute("aria-hidden", String(!state));
       document.body.style.overflow = state ? "hidden" : "";
       document.getElementById("navToggle")?.setAttribute("aria-expanded", String(state));
     };
@@ -155,6 +159,9 @@
     document.getElementById("navClose")?.addEventListener("click", () => open(false));
     backdrop?.addEventListener("click", () => open(false));
     drawer?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => open(false)));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && drawer?.classList.contains("open")) open(false);
+    });
 
     // language toggle
     document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {

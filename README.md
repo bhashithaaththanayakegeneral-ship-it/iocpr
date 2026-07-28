@@ -8,12 +8,15 @@ Modern, responsive website for the **International Organization for Crime Preven
 
 > _“A Hand to Reform, A World Without Crime.”_
 
+**Content editors:** see [`USER_GUIDE.md`](USER_GUIDE.md) for how to upload images in WordPress and set Alt Text so photos appear in Gallery, Projects, and Home.
+
 ---
 
 ## Project structure
 
 ```
 iocpr-web/
+├── USER_GUIDE.md         # How to upload & tag images in WordPress
 ├── index.html            # Home
 ├── about.html            # Mission, vision, pillars, values
 ├── programs.html         # The six core programmes
