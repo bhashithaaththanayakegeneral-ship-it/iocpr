@@ -3,7 +3,7 @@
 Modern, responsive website for the **International Organization for Crime Prevention and Rehabilitation (IOCPR)**.
 
 - **Frontend:** plain HTML + CSS + vanilla JavaScript — no build step.
-- **Backend (headless CMS):** the existing WordPress site at `https://iocpr.com` via its public REST API.
+- **Backend (headless CMS):** the WordPress site at `https://iocpr.online` via its public REST API.
 - **Hosting:** Vercel (static).
 
 > _“A Hand to Reform, A World Without Crime.”_
@@ -62,7 +62,7 @@ To point the site at a different WordPress install, edit one line in
 [`assets/js/config.js`](assets/js/config.js):
 
 ```js
-WP_BASE: "https://iocpr.com/wp-json",
+WP_BASE: "https://iocpr.online/wp-json",
 ```
 
 ### CORS

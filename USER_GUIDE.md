@@ -4,7 +4,7 @@ Guide for updating the public website using the WordPress media library.
 
 The website reads images live from:
 
-`https://iocpr.com/wp-json/wp/v2/media`
+`https://iocpr.online/wp-json/wp/v2/media`
 
 You do **not** need to edit website code to add photos. Upload in WordPress, set the **Alternative Text**, and refresh the site.
 

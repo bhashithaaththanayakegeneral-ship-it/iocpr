@@ -2,7 +2,7 @@
    The WordPress backend powers dynamic sections (News + Gallery) via the
    public REST API. Change WP_BASE to point at a different WordPress install. */
 window.IOCPR = {
-  WP_BASE: "https://iocpr.com/wp-json",
+  WP_BASE: "https://iocpr.online/wp-json",
   /* Contact Form 7 — shortcode hash 8c4c6a1; REST API needs numeric post ID */
   CF7: {
     formId: "3626",
@@ -14,7 +14,7 @@ window.IOCPR = {
     email: "iocproffice@gmail.com",
     phone: "0770023624 / 0770023654",
     address: "Himbutana, Battaramulla, Sri Lanka",
-    logo: "https://iocpr.com/wp-content/uploads/2026/03/IOCRP-scaled.png",
+    logo: "https://iocpr.online/wp-content/uploads/2026/07/IOCRP-scaled-1.png",
     founded: "2025",
     social: {
       facebook: "https://facebook.com/",

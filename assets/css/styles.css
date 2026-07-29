@@ -453,6 +453,7 @@ p { color: var(--body); }
   touch-action: pan-y; user-select: none; cursor: grab;
   isolation: isolate;
 }
+.carousel--empty { cursor: default; }
 .carousel:active { cursor: grabbing; }
 .carousel__viewport { position: relative; width: 100%; height: 100%; overflow: hidden; }
 .carousel__track {

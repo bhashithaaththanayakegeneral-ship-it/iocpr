@@ -70,14 +70,11 @@
     },
   ];
 
-  const PLACEHOLDER = {
-    thumb: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
-    src: "https://iocpr.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-18-at-20.56.37.jpeg",
-    alt: "IOCPR",
-  };
-
   function carouselHTML(project) {
     const imgs = project.images || [];
+    if (!imgs.length) {
+      return `<div class="carousel carousel--empty" aria-hidden="true"></div>`;
+    }
     const multi = imgs.length > 1;
     const slides = imgs
       .map(
@@ -234,42 +231,24 @@
       .trim();
   }
 
-  /* Fixed cards: titles/descriptions + WP images matched by project name.
-     Untagged gallery photos are spread across cards so swipe still works. */
-  function buildProjects(groups, allImages) {
+  /* Fixed cards: only images whose Alt project name matches the card.
+     No leftovers — unmatched alts (e.g. lawlady) are not spread across projects. */
+  function buildProjects(groups) {
     const byName = new Map();
     (groups || []).forEach((g) => {
       const key = matchKey(g.name);
       if (key) byName.set(key, g.images || []);
     });
 
-    const used = new Set();
-    const assigned = PROJECTS.map((meta) => {
+    return PROJECTS.map((meta) => {
       const keys = [meta.altKey, meta.name].filter(Boolean).map(matchKey);
       const imgs =
         keys.map((k) => byName.get(k)).find((list) => list && list.length) || [];
-      imgs.forEach((img) => {
-        if (img.id != null) used.add(img.id);
-        else if (img.src) used.add(img.src);
-      });
-      return { ...meta, images: [...imgs] };
+      return {
+        ...meta,
+        images: [...imgs],
+      };
     });
-
-    const leftovers = (allImages || []).filter((img) => {
-      if (img.id != null) return !used.has(img.id);
-      return img.src && !used.has(img.src);
-    });
-
-    assigned.forEach((project, i) => {
-      if (project.images.length) return;
-      const chunk = [];
-      for (let n = i; n < leftovers.length; n += PROJECTS.length) chunk.push(leftovers[n]);
-      if (!chunk.length && leftovers.length) chunk.push(leftovers[i % leftovers.length]);
-      if (!chunk.length) chunk.push({ ...PLACEHOLDER, alt: project.name });
-      project.images = chunk;
-    });
-
-    return assigned;
   }
 
   mount.className = "grid grid-3 projects-grid";
@@ -278,11 +257,8 @@
   ).join("");
 
   (async () => {
-    const [groups, all] = await Promise.all([
-      window.WP.mediaByProject(),
-      window.WP.mediaAll?.() || [],
-    ]);
-    const projects = buildProjects(groups, all);
+    const groups = await window.WP.mediaByProject();
+    const projects = buildProjects(groups);
 
     mount.innerHTML = projects.map(cardHTML).join("");
     mount.querySelectorAll("[data-carousel]").forEach(initCarousel);

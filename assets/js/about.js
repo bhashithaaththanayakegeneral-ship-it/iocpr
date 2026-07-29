@@ -1,16 +1,18 @@
 /* About page — load leadership portraits from WP Alt Text.
    Chairman: "nilantha"
    Secretary General: "Secretary General"
-   Senior Advisors: "anusha edirisnghe", "udayakumara" */
+   Senior Advisors: "anusha edirisnghe", "Udaya Kumara" / "udayakumara" */
 (function () {
   const slots = [...document.querySelectorAll("[data-leader-photo]")];
   if (!slots.length || !window.WP?.mediaAll) return;
+
+  const norm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
   const matchers = {
     nilantha: (alt) => /^nilantha$/i.test(alt),
     "secretary-general": (alt) => /^secretary\s+general$/i.test(alt),
     "anusha-edirisnghe": (alt) => /^anusha\s+edirisnghe$/i.test(alt),
-    udayakumara: (alt) => /^udayakumara$/i.test(alt),
+    udayakumara: (alt) => /^(udaya\s*kumara|udayakumara)$/i.test(norm(alt)),
   };
 
   WP.mediaAll().then((items) => {

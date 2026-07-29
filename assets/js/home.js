@@ -131,7 +131,21 @@
     restart();
   }
 
+  async function bootAltPhotos() {
+    const slots = [...document.querySelectorAll("[data-alt-photo]")];
+    if (!slots.length || !window.WP?.mediaByAlt) return;
+    await Promise.all(
+      slots.map(async (img) => {
+        const key = img.getAttribute("data-alt-photo");
+        const hit = await window.WP.mediaByAlt(key);
+        if (!hit?.src) return;
+        img.src = hit.thumb || hit.src;
+      })
+    );
+  }
+
   async function boot() {
+    await bootAltPhotos();
     const frame = document.querySelector("[data-hero-frame]");
     if (!frame || !window.WP) return;
     const aboutOnly = frame.getAttribute("data-hero-scope") === "about";

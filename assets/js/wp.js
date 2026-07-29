@@ -47,6 +47,12 @@
     return cleaned;
   };
 
+  /* Slot-only portraits — Home/About slots only; never Gallery, Projects, or hero pools. */
+  const isReservedAlt = (name) =>
+    /^(lawlady|nilantha|secretary\s+general|anusha\s+edirisnghe|udaya\s*kumara|udayakumara)$/i.test(
+      String(name || "").trim()
+    );
+
   /* Alt flags:
      - hero / Project | hero     → Home hero carousel
      - hero-f1, hero-f2, …       → Home hero, sorted first (f1, f2, …)
@@ -110,6 +116,7 @@
   const mapMedia = (m) => {
     const rawAlt = strip(m.alt_text || "");
     const meta = parseAltMeta(rawAlt);
+    const reserved = isReservedAlt(meta.project);
     return {
       id: m.id,
       src: m.source_url,
@@ -118,11 +125,12 @@
         || m.source_url,
       project: meta.project,
       flags: meta.flags,
-      home: meta.home,
-      hero: meta.hero,
+      home: meta.home && !reserved,
+      hero: meta.hero && !reserved,
       heroRank: meta.heroRank || 0,
       homeFeaturedRank: meta.homeFeaturedRank || 0,
       aboutHero: !!meta.aboutHero,
+      reserved,
       alt: meta.project || strip(m.title?.rendered) || "IOCPR gallery image",
       title: strip(m.title?.rendered) || "",
       date: m.date || "",
@@ -193,6 +201,12 @@
       return all;
     },
 
+    /* Gallery images only — excludes reserved slot portraits (lawlady, leaders, …). */
+    async mediaForGallery(perPage = 0) {
+      const imgs = perPage > 0 ? await this.media(perPage) : await this.mediaAll();
+      return imgs.filter((m) => !m.reserved);
+    },
+
     /* Group gallery images by WordPress Alt Text (= project name).
        Returns [{ name, slug, images: [...] }, ...] sorted by name. */
     async mediaByProject() {
@@ -200,13 +214,7 @@
       const map = new Map();
       imgs.forEach((img) => {
         const name = img.project || normalizeProject(img.alt);
-        if (!name) return;
-        /* Role portraits are not projects */
-        if (/^secretary\s+general$/i.test(name)) return;
-        if (/^nilantha$/i.test(name)) return;
-        if (/^anusha\s+edirisnghe$/i.test(name)) return;
-        if (/^udayakumara$/i.test(name)) return;
-        if (/^lawlady$/i.test(name)) return;
+        if (!name || img.reserved) return;
         if (/^hero-f\d+$/i.test(name)) return;
         if (/^hero-[12]$/i.test(name)) return;
         const key = name.toLowerCase();
@@ -218,11 +226,10 @@
       return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
     },
 
-    /* Images for homepage supporting sections: | home (and | hero). Falls back to gallery. */
+    /* Images for homepage supporting sections: only | home / | hero (no untagged fallback). */
     async mediaForHome(limit = 24) {
       const imgs = await this.mediaAll();
-      const tagged = imgs.filter((m) => m.home || m.hero);
-      const pool = tagged.length ? tagged : imgs;
+      const pool = imgs.filter((m) => !m.reserved && (m.home || m.hero));
       const heroes = pool.filter((m) => m.hero);
       const rest = pool.filter((m) => !m.hero);
       return [...heroes, ...rest].slice(0, limit);
@@ -233,7 +240,7 @@
     async mediaForHero(limit = 0) {
       const imgs = await this.mediaAll();
       const heroes = imgs
-        .filter((m) => m.hero && !m.aboutHero)
+        .filter((m) => m.hero && !m.aboutHero && !m.reserved)
         .sort((a, b) => {
           const fa = a.homeFeaturedRank > 0 ? a.homeFeaturedRank : 999;
           const fb = b.homeFeaturedRank > 0 ? b.homeFeaturedRank : 999;
@@ -241,6 +248,14 @@
           return 0;
         });
       return limit > 0 ? heroes.slice(0, limit) : heroes;
+    },
+
+    /* Single reserved slot image by exact Alt (e.g. lawlady). */
+    async mediaByAlt(alt) {
+      const want = String(alt || "").trim().toLowerCase();
+      if (!want) return null;
+      const imgs = await this.mediaAll();
+      return imgs.find((m) => String(m.project || m.alt || "").trim().toLowerCase() === want) || null;
     },
 
     /* About story carousel — only hero-1 then hero-2. */

@@ -24,7 +24,9 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
 
   (async () => {
-    let imgs = loadAll ? await window.WP.mediaAll() : await window.WP.media(limit);
+    let imgs = loadAll
+      ? await window.WP.mediaForGallery()
+      : await window.WP.mediaForGallery(limit);
     if (!loadAll && imgs.length > limit) imgs = imgs.slice(0, limit);
 
     if (!imgs.length) {
