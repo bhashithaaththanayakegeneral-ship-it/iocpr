@@ -49,7 +49,7 @@
 
   /* Slot-only portraits — Home/About slots only; never Gallery, Projects, or hero pools. */
   const isReservedAlt = (name) =>
-    /^(lawlady|nilantha|secretary\s+general|anusha\s+edirisnghe|udaya\s*kumara|udayakumara)$/i.test(
+    /^(lawlady|impact|nilantha(\s+kotikawatta)?|secretary\s+general|anusha\s+ediris(i)?nghe|udaya\s*kumara|udayakumara)$/i.test(
       String(name || "").trim()
     );
 
