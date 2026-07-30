@@ -10,14 +10,11 @@
   async function getOnce(path, params) {
     const url = new URL(BASE + path);
     if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+    /* Bust intermediary caches without custom headers (custom headers break WP CORS). */
     url.searchParams.set("_", bust());
     const res = await fetch(url.toString(), {
       cache: "no-store",
-      headers: {
-        Accept: "application/json",
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
-      },
+      headers: { Accept: "application/json" },
     });
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
