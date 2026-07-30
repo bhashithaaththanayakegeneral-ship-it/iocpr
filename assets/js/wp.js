@@ -4,18 +4,41 @@
 (function () {
   const BASE = window.IOCPR.WP_BASE;
 
-  async function get(path, params) {
+  /* Avoid stale browser/CDN caches of the media list (client-reported missing images). */
+  const bust = () => String(Math.floor(Date.now() / 60000)); /* changes every minute */
+
+  async function getOnce(path, params) {
     const url = new URL(BASE + path);
     if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    try {
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("[wp] request failed:", url.toString(), err.message);
-      return null;
-    }
+    url.searchParams.set("_", bust());
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
   }
+
+  async function get(path, params, retries = 2) {
+    let lastErr;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await getOnce(path, params);
+      } catch (err) {
+        lastErr = err;
+        if (attempt < retries) await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+      }
+    }
+    console.warn("[wp] request failed:", BASE + path, lastErr?.message || lastErr);
+    return null;
+  }
+
+  /* One in-memory media fetch per page load (still no-store on the network). */
+  let mediaAllPromise = null;
 
   const decode = (s) => {
     if (!s) return "";
@@ -181,24 +204,34 @@
 
     /* Fetch every gallery-worthy image across all WP media pages */
     async mediaAll() {
-      const all = [];
-      const pageSize = 100;
-      for (let page = 1; page <= 20; page++) {
-        const data = await get("/wp/v2/media", {
-          per_page: pageSize,
-          page,
-          media_type: "image",
-          _fields: "id,source_url,alt_text,title,media_details,date",
-        });
-        if (!Array.isArray(data) || !data.length) break;
-        all.push(
-          ...data
-            .filter((m) => m.source_url && isGalleryWorthy(m.source_url))
-            .map(mapMedia)
-        );
-        if (data.length < pageSize) break;
+      if (mediaAllPromise) return mediaAllPromise;
+      mediaAllPromise = (async () => {
+        const all = [];
+        const pageSize = 100;
+        for (let page = 1; page <= 20; page++) {
+          const data = await get("/wp/v2/media", {
+            per_page: pageSize,
+            page,
+            media_type: "image",
+            _fields: "id,source_url,alt_text,title,media_details,date",
+          });
+          if (!Array.isArray(data) || !data.length) break;
+          all.push(
+            ...data
+              .filter((m) => m.source_url && isGalleryWorthy(m.source_url))
+              .map(mapMedia)
+          );
+          if (data.length < pageSize) break;
+        }
+        return all;
+      })();
+      try {
+        return await mediaAllPromise;
+      } catch (err) {
+        mediaAllPromise = null;
+        console.warn("[wp] mediaAll failed:", err?.message || err);
+        return [];
       }
-      return all;
     },
 
     /* Gallery images only — excludes reserved slot portraits (lawlady, leaders, …). */
